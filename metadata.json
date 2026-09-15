@@ -1,0 +1,6 @@
+{
+  "name": "Zenza Shop Admin",
+  "description": "Painel Administrativo Zenza Shop Angola — Gestão de Catálogo, Cadastro e Edição de Produtos",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
