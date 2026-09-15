@@ -3,6 +3,7 @@ import { GalleryImage } from '../../types/product';
 import { Button } from '../ui/Button';
 import { Badge } from '../ui/Badge';
 import { Input } from '../ui/Input';
+import { FormField } from '../ui/FormField';
 import { Modal, ConfirmDialog } from '../ui/Modal';
 import { useToast } from '../../context/ToastContext';
 import { 
@@ -457,14 +458,15 @@ export const ImageGalleryManager: React.FC<ImageGalleryManagerProps> = ({
         size="md"
       >
         <div className="space-y-4">
-          <Input
-            id="url-input"
-            label="Endereço URL da Imagem"
-            placeholder="https://exemplo.com/fotos/produto.jpg"
-            value={urlInput}
-            onChange={(e) => setUrlInput(e.target.value)}
-            leftElement={<LinkIcon className="w-4 h-4 text-[#191c1d]/40" />}
-          />
+          <FormField id="url-input" label="Endereço URL da Imagem" required>
+            <Input
+              id="url-input"
+              placeholder="https://exemplo.com/fotos/produto.jpg"
+              value={urlInput}
+              onChange={(e) => setUrlInput(e.target.value)}
+              leftElement={<LinkIcon className="w-4 h-4 text-[#191c1d]/40" />}
+            />
+          </FormField>
 
           {urlInput && (
             <div className="p-3 bg-[#f8f9fa] rounded-xl border border-[rgba(25,28,29,0.10)] flex items-center gap-3">

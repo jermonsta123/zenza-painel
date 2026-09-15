@@ -343,7 +343,7 @@ export const ProductFormView: React.FC<ProductFormViewProps> = ({
             variant="outline"
             size="sm"
             onClick={() => handleSaveProduct('draft')}
-            loading={isSubmitting}
+            isLoading={isSubmitting}
             leftIcon={<Save className="w-4 h-4" />}
           >
             Guardar Rascunho
@@ -368,7 +368,7 @@ export const ProductFormView: React.FC<ProductFormViewProps> = ({
             variant="primary"
             size="sm"
             onClick={() => handleSaveProduct('published')}
-            loading={isSubmitting}
+            isLoading={isSubmitting}
             leftIcon={<Globe className="w-4 h-4" />}
           >
             {formData.status === 'published' ? 'Atualizar na Loja' : 'Publicar Produto'}
@@ -791,7 +791,7 @@ export const ProductFormView: React.FC<ProductFormViewProps> = ({
         description="Tens alterações por guardar neste produto. Se saíres agora, todas as modificações recentes serão perdidas."
         confirmLabel="Sim, Descartar e Sair"
         cancelLabel="Continuar a Editar"
-        variant="danger"
+        variant="destructive"
       />
 
       {/* MODAL 2: Confirm Publishing with 0 Stock */}

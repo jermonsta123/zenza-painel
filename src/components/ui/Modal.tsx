@@ -118,10 +118,13 @@ export interface ConfirmDialogProps {
   onClose: () => void;
   onConfirm: () => void | Promise<void>;
   title: string;
-  message: string;
+  message?: string;
+  description?: string;
   confirmText?: string;
+  confirmLabel?: string;
   cancelText?: string;
-  variant?: 'destructive' | 'warning' | 'primary';
+  cancelLabel?: string;
+  variant?: 'destructive' | 'warning' | 'primary' | 'danger' | 'default';
   isLoading?: boolean;
 }
 
@@ -131,23 +134,31 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
   onConfirm,
   title,
   message,
-  confirmText = 'Confirmar Ação',
-  cancelText = 'Cancelar',
+  description,
+  confirmText,
+  confirmLabel,
+  cancelText,
+  cancelLabel,
   variant = 'destructive',
   isLoading = false,
 }) => {
+  const effectiveMessage = message || description || '';
+  const effectiveConfirmText = confirmText || confirmLabel || 'Confirmar Ação';
+  const effectiveCancelText = cancelText || cancelLabel || 'Cancelar';
+  const isDestructive = variant === 'destructive' || variant === 'danger';
+
   return (
     <Modal isOpen={isOpen} onClose={onClose} size="sm" showCloseButton={!isLoading}>
       <div className="flex flex-col items-center text-center">
         <div className={`w-12 h-12 rounded-full flex items-center justify-center mb-4 ${
-          variant === 'destructive' ? 'bg-red-50 text-red-600' : 'bg-amber-50 text-amber-600'
+          isDestructive ? 'bg-red-50 text-red-600' : 'bg-amber-50 text-amber-600'
         }`}>
           <AlertTriangle className="w-6 h-6" />
         </div>
         
         <h3 className="text-base font-bold text-[#191c1d] mb-1.5">{title}</h3>
         <p className="text-xs text-[#191c1d]/70 leading-relaxed mb-6">
-          {message}
+          {effectiveMessage}
         </p>
 
         <div className="flex items-center justify-end gap-3 w-full">
@@ -157,15 +168,15 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
             disabled={isLoading}
             className="flex-1"
           >
-            {cancelText}
+            {effectiveCancelText}
           </Button>
           <Button
-            variant={variant === 'destructive' ? 'destructive' : 'primary'}
+            variant={isDestructive ? 'destructive' : 'primary'}
             onClick={onConfirm}
             isLoading={isLoading}
             className="flex-1"
           >
-            {confirmText}
+            {effectiveConfirmText}
           </Button>
         </div>
       </div>

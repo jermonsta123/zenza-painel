@@ -337,7 +337,7 @@ export const CategoriesView: React.FC = () => {
         description="Esta ação removerá a subcategoria da taxonomia do catálogo. Os produtos associados precisarão de ser reclassificados."
         confirmLabel="Sim, Eliminar"
         cancelLabel="Cancelar"
-        variant="danger"
+        variant="destructive"
       />
     </div>
   );

@@ -1,26 +1,31 @@
-import React, { useState } from 'react';
-import { ToastProvider, useToast } from './context/ToastContext';
-import { AuthProvider, useAuth } from './context/AuthContext';
-import { AdminLayout } from './components/layout/AdminLayout';
-import { DashboardView } from './views/DashboardView';
-import { DesignSystemShowcaseView } from './views/DesignSystemShowcaseView';
-import { OrdersView } from './views/OrdersView';
-import { ProductsView } from './views/ProductsView';
-import { CategoriesView } from './views/CategoriesView';
-import { StockInventoryView } from './views/StockInventoryView';
-import { PaymentsView } from './views/PaymentsView';
-import { DeliveriesView } from './views/DeliveriesView';
-import { CustomersView } from './views/CustomersView';
-import { CouponsView } from './views/CouponsView';
-import { ReviewsModerationView } from './views/ReviewsModerationView';
-import { AdminUsersView } from './views/AdminUsersView';
-import { SettingsAuditView } from './views/SettingsAuditView';
-import { GenericSectionView } from './views/GenericSectionView';
-import { StateView } from './components/ui/StateView';
-import { NAVIGATION_GROUPS } from './theme/tokens';
+'use client';
 
-function AdminApp() {
-  const [currentView, setCurrentView] = useState<string>('dashboard');
+import React, { useState, Suspense } from 'react';
+import { useSearchParams } from 'next/navigation';
+import { useToast } from '../context/ToastContext';
+import { useAuth } from '../context/AuthContext';
+import { AdminLayout } from '../components/layout/AdminLayout';
+import { DashboardView } from '../views/DashboardView';
+import { DesignSystemShowcaseView } from '../views/DesignSystemShowcaseView';
+import { OrdersView } from '../views/OrdersView';
+import { ProductsView } from '../views/ProductsView';
+import { CategoriesView } from '../views/CategoriesView';
+import { StockInventoryView } from '../views/StockInventoryView';
+import { PaymentsView } from '../views/PaymentsView';
+import { DeliveriesView } from '../views/DeliveriesView';
+import { CustomersView } from '../views/CustomersView';
+import { CouponsView } from '../views/CouponsView';
+import { ReviewsModerationView } from '../views/ReviewsModerationView';
+import { AdminUsersView } from '../views/AdminUsersView';
+import { SettingsAuditView } from '../views/SettingsAuditView';
+import { GenericSectionView } from '../views/GenericSectionView';
+import { StateView } from '../components/ui/StateView';
+import { NAVIGATION_GROUPS } from '../theme/tokens';
+
+function AdminContent() {
+  const searchParams = useSearchParams();
+  const initialView = searchParams.get('view') || 'dashboard';
+  const [currentView, setCurrentView] = useState<string>(initialView);
   const { success, info } = useToast();
 
   // Determine current page title, group label, and dynamic breadcrumb
@@ -121,12 +126,10 @@ function AdminApp() {
   );
 }
 
-export default function App() {
+export default function Page() {
   return (
-    <AuthProvider>
-      <ToastProvider>
-        <AdminApp />
-      </ToastProvider>
-    </AuthProvider>
+    <Suspense fallback={<div className="p-8 text-center text-xs text-[#191c1d]/50">A carregar painel administrativo...</div>}>
+      <AdminContent />
+    </Suspense>
   );
 }

@@ -28,8 +28,8 @@ export const MetricCard: React.FC<MetricCardProps> = ({
   variant = 'brand',
 }) => {
   // Dynamically get Lucide icon
-  const iconsRecord = LucideIcons as Record<string, React.ElementType>;
-  const IconComponent = iconsRecord[iconName] || LucideIcons.BarChart3;
+  const iconsRecord = LucideIcons as unknown as Record<string, React.ElementType>;
+  const IconComponent = (iconsRecord[iconName] || LucideIcons.BarChart3) as React.ElementType;
 
   const iconColors = {
     brand: 'bg-[#fff3ef] text-[#a63500] border-[#ffb59c]/60',

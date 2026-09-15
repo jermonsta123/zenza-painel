@@ -517,7 +517,7 @@ export const ProductsView: React.FC = () => {
         description={`Tens a certeza de que desejas eliminar definitivamente o produto "${productToDelete?.title}" (SKU: ${productToDelete?.sku})? Esta ação não pode ser revertida.`}
         confirmLabel="Sim, Eliminar Produto"
         cancelLabel="Cancelar"
-        variant="danger"
+        variant="destructive"
       />
     </div>
   );

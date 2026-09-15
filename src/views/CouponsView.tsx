@@ -430,7 +430,7 @@ export const CouponsView: React.FC = () => {
         }
         confirmLabel={couponToToggle?.status === 'active' ? 'Sim, Desativar' : 'Sim, Reativar'}
         cancelLabel="Voltar"
-        variant={couponToToggle?.status === 'active' ? 'danger' : 'default'}
+        variant={couponToToggle?.status === 'active' ? 'destructive' : 'primary'}
       />
     </div>
   );

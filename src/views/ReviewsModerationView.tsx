@@ -324,7 +324,7 @@ export const ReviewsModerationView: React.FC = () => {
         description={`Ao aprovar esta avaliação (${reviewToApprove?.rating} estrelas), ela ficará imediatamente visível para todos os visitantes do produto "${reviewToApprove?.productTitle}" na loja Zenza Shop e influenciará a classificação média global.`}
         confirmLabel="Sim, Aprovar e Publicar"
         cancelLabel="Cancelar"
-        variant="default"
+        variant="primary"
       />
 
       {/* Confirm Reject Review Modal (Dangerous Operation) */}
