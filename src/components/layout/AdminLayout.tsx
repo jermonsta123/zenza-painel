@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { usePathname, useRouter } from 'next/navigation';
 import { Sidebar } from './Sidebar';
 import { Header } from './Header';
 import { NotificationDrawer } from './NotificationDrawer';
@@ -6,29 +7,52 @@ import { Modal } from '../ui/Modal';
 import { Input } from '../ui/Input';
 import { Search, Package, ShoppingBag, Users, ArrowRight, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
+import { getNavInfo, VIEW_TO_PATH, BreadcrumbItem } from '../../lib/navigation';
 
-interface AdminLayoutProps {
-  currentView: string;
-  onSelectView: (viewId: string) => void;
-  title: string;
-  breadcrumbs: { label: string; onClick?: () => void }[];
+export interface AdminLayoutProps {
+  currentView?: string;
+  onSelectView?: (viewId: string) => void;
+  title?: string;
+  breadcrumbs?: BreadcrumbItem[];
   children: React.ReactNode;
   onQuickAction?: () => void;
 }
 
 export const AdminLayout: React.FC<AdminLayoutProps> = ({
-  currentView,
+  currentView: propCurrentView,
   onSelectView,
-  title,
-  breadcrumbs,
+  title: propTitle,
+  breadcrumbs: propBreadcrumbs,
   children,
   onQuickAction,
 }) => {
+  const router = useRouter();
+  const pathname = usePathname() || '/';
+  const navInfo = getNavInfo(pathname);
+
+  const currentView = propCurrentView || navInfo.currentView;
+  const title = propTitle || navInfo.title;
+  const breadcrumbs = propBreadcrumbs || navInfo.breadcrumbs;
+
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+
+  const handleNavigate = (viewId: string) => {
+    onSelectView?.(viewId);
+    const targetPath = VIEW_TO_PATH[viewId] || `/${viewId}`;
+    router.push(targetPath);
+  };
+
+  const handleQuickAction = () => {
+    if (onQuickAction) {
+      onQuickAction();
+    } else {
+      router.push('/produtos?novo=true');
+    }
+  };
 
   // Keyboard shortcut ⌘K / Ctrl+K listener
   useEffect(() => {
@@ -48,7 +72,7 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
       <div className="hidden lg:block h-full shrink-0">
         <Sidebar
           currentView={currentView}
-          onSelectView={onSelectView}
+          onSelectView={handleNavigate}
           isCollapsed={isSidebarCollapsed}
           onToggleCollapse={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
         />
@@ -76,7 +100,7 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
             >
               <Sidebar
                 currentView={currentView}
-                onSelectView={onSelectView}
+                onSelectView={handleNavigate}
                 isCollapsed={false}
                 onCloseMobile={() => setIsMobileMenuOpen(false)}
               />
@@ -93,7 +117,7 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
           breadcrumbs={breadcrumbs}
           onOpenMobileMenu={() => setIsMobileMenuOpen(true)}
           onOpenNotifications={() => setIsNotificationsOpen(true)}
-          onQuickAction={onQuickAction}
+          onQuickAction={handleQuickAction}
           onSearchClick={() => setIsSearchOpen(true)}
         />
 
@@ -141,7 +165,7 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
             </span>
             <button
               onClick={() => {
-                onSelectView('pedidos');
+                handleNavigate('pedidos');
                 setIsSearchOpen(false);
               }}
               className="w-full flex items-center justify-between p-2 rounded-lg hover:bg-[#fff3ef] hover:text-[#a63500] transition-colors text-left"
@@ -154,7 +178,7 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
             </button>
             <button
               onClick={() => {
-                onSelectView('produtos');
+                handleNavigate('produtos');
                 setIsSearchOpen(false);
               }}
               className="w-full flex items-center justify-between p-2 rounded-lg hover:bg-[#fff3ef] hover:text-[#a63500] transition-colors text-left"
@@ -167,7 +191,7 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
             </button>
             <button
               onClick={() => {
-                onSelectView('design-system');
+                handleNavigate('design-system');
                 setIsSearchOpen(false);
               }}
               className="w-full flex items-center justify-between p-2 rounded-lg hover:bg-[#fff3ef] hover:text-[#a63500] transition-colors text-left"

@@ -1,4 +1,5 @@
 import React from 'react';
+import Link from 'next/link';
 import { Button } from './Button';
 import { PackageOpen, Inbox, SearchX, RefreshCw } from 'lucide-react';
 
@@ -148,6 +149,13 @@ export const Breadcrumb: React.FC<BreadcrumbProps> = ({ items }) => {
                 <span className="font-semibold text-[#191c1d]" aria-current="page">
                   {item.label}
                 </span>
+              ) : item.href ? (
+                <Link
+                  href={item.href}
+                  className="hover:text-[#a63500] transition-colors focus:outline-none"
+                >
+                  {item.label}
+                </Link>
               ) : (
                 <button
                   type="button"

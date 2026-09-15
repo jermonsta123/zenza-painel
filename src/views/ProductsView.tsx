@@ -32,14 +32,18 @@ import {
   TrendingDown
 } from 'lucide-react';
 
-export const ProductsView: React.FC = () => {
+interface ProductsViewProps {
+  initialCreate?: boolean;
+}
+
+export const ProductsView: React.FC<ProductsViewProps> = ({ initialCreate = false }) => {
   const { success, warning, info, error: toastError } = useToast();
 
   // Products Database State
   const [productsList, setProductsList] = useState<Product[]>(SAMPLE_PRODUCTS);
 
   // Active view mode: 'list' | 'form'
-  const [viewState, setViewState] = useState<'list' | 'form'>('list');
+  const [viewState, setViewState] = useState<'list' | 'form'>(initialCreate ? 'form' : 'list');
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
 
   // Filters & Search

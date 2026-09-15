@@ -1,5 +1,8 @@
 import React from 'react';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { NAVIGATION_GROUPS } from '../../theme/tokens';
+import { VIEW_TO_PATH } from '../../lib/navigation';
 import { Badge } from '../ui/Badge';
 import { 
   LayoutDashboard, 
@@ -45,8 +48,8 @@ const iconMap: Record<string, React.ReactNode> = {
 };
 
 interface SidebarProps {
-  currentView: string;
-  onSelectView: (viewId: string) => void;
+  currentView?: string;
+  onSelectView?: (viewId: string) => void;
   isCollapsed?: boolean;
   onToggleCollapse?: () => void;
   onCloseMobile?: () => void;
@@ -59,6 +62,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
   onToggleCollapse,
   onCloseMobile,
 }) => {
+  const pathname = usePathname() || '/';
+
   return (
     <aside
       className={`bg-white border-r border-[rgba(25,28,29,0.10)] h-full flex flex-col justify-between transition-all duration-200 select-none z-30 ${
@@ -67,9 +72,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
     >
       {/* Brand Header */}
       <div className="p-4 border-b border-[rgba(25,28,29,0.08)] flex items-center justify-between">
-        <div 
+        <Link 
+          href="/"
           onClick={() => {
-            onSelectView('dashboard');
+            onSelectView?.('dashboard');
             onCloseMobile?.();
           }}
           className="flex items-center gap-3 cursor-pointer group"
@@ -94,7 +100,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
               </span>
             </div>
           )}
-        </div>
+        </Link>
 
         {/* Collapse toggle on Desktop */}
         {onToggleCollapse && (
@@ -120,14 +126,19 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
             <div className="space-y-0.5">
               {group.items.map((item) => {
-                const isActive = currentView === item.id;
+                const targetPath = VIEW_TO_PATH[item.id] || `/${item.id}`;
+                const isActive =
+                  item.id === 'dashboard'
+                    ? pathname === '/'
+                    : pathname === targetPath || pathname.startsWith(targetPath + '/');
                 const icon = iconMap[item.iconName] || <LayoutDashboard className="w-4 h-4" />;
 
                 return (
-                  <button
+                  <Link
                     key={item.id}
+                    href={targetPath}
                     onClick={() => {
-                      onSelectView(item.id);
+                      onSelectView?.(item.id);
                       onCloseMobile?.();
                     }}
                     title={isCollapsed ? item.label : undefined}
@@ -156,7 +167,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                         </Badge>
                       </span>
                     )}
-                  </button>
+                  </Link>
                 );
               })}
             </div>
@@ -185,13 +196,17 @@ export const Sidebar: React.FC<SidebarProps> = ({
               </div>
             </div>
             
-            <button
-              onClick={() => onSelectView('design-system')}
+            <Link
+              href="/design-system"
+              onClick={() => {
+                onSelectView?.('design-system');
+                onCloseMobile?.();
+              }}
               title="Design System"
               className="p-1.5 text-[#191c1d]/50 hover:text-[#a63500] hover:bg-white rounded-md transition-colors"
             >
               <Sparkles className="w-4 h-4" />
-            </button>
+            </Link>
           </div>
         ) : (
           <div className="flex justify-center">
