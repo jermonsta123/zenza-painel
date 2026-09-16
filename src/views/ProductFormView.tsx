@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Product, ProductFormErrors, GalleryImage, ProductSpec, ProductColor, SizeCategory, ProductStatus } from '../types/product';
-import { CATEGORIES_CATALOG } from '../data/categoriesCatalog';
+import { Product, ProductFormErrors, GalleryImage, ProductSpec, ProductColor, SizeCategory, ProductStatus, ProductDimensions } from '../types/product';
+import { useCategories } from '../context/CategoriesContext';
 import { Card, CardHeader, CardTitle, CardDescription } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
 import { Badge } from '../components/ui/Badge';
@@ -12,6 +12,7 @@ import { useToast } from '../context/ToastContext';
 import { CategorySelector } from '../components/products/CategorySelector';
 import { PricingDiscountCalculator } from '../components/products/PricingDiscountCalculator';
 import { ImageGalleryManager } from '../components/products/ImageGalleryManager';
+import { DimensionsEditor } from '../components/products/DimensionsEditor';
 import { SpecsKeyValEditor } from '../components/products/SpecsKeyValEditor';
 import { BoxItemsEditor } from '../components/products/BoxItemsEditor';
 import { VariantsEditor } from '../components/products/VariantsEditor';
@@ -36,7 +37,10 @@ import {
   Clock,
   ShieldCheck,
   AlertTriangle,
-  RotateCcw
+  RotateCcw,
+  Box,
+  Ruler,
+  Wand2
 } from 'lucide-react';
 
 interface ProductFormViewProps {
@@ -66,15 +70,19 @@ const DEFAULT_EMPTY_PRODUCT: Product = {
   lowStockThreshold: 5,
   trackInventory: true,
   description: '',
-  specs: [
-    { id: 's1', key: 'Composição', value: '100% Linho Europeu' },
-    { id: 's2', key: 'Origem', value: 'Feito com rigor artesanal' },
-  ],
-  boxItems: ['1x Produto Zenza Shop', '1x Embalagem de Proteção'],
-  colors: [{ id: 'c1', name: 'Terracota Zenza', hex: '#a63500' }],
-  hasSizeGuide: true,
-  sizeCategory: 'clothing',
-  sizes: ['S', 'M', 'L', 'XL'],
+  specs: [],
+  boxItems: [],
+  dimensions: {
+    weightKg: 0.5,
+    lengthCm: 30,
+    widthCm: 20,
+    heightCm: 8,
+    packageType: 'Caixa Standard Zenza',
+  },
+  colors: [],
+  hasSizeGuide: false,
+  sizeCategory: 'none',
+  sizes: [],
   status: 'draft',
   rating: 5.0,
   reviewCount: 0,
@@ -83,12 +91,14 @@ const DEFAULT_EMPTY_PRODUCT: Product = {
   updatedAt: new Date().toISOString(),
 };
 
+
 export const ProductFormView: React.FC<ProductFormViewProps> = ({
   initialProduct,
   onSave,
   onCancel,
 }) => {
   const { success, warning, error: toastError, info } = useToast();
+  const { categories } = useCategories();
   const isEditMode = Boolean(initialProduct && initialProduct.id);
 
   // Core Product State
@@ -165,7 +175,7 @@ export const ProductFormView: React.FC<ProductFormViewProps> = ({
     if (!formData.category) {
       newErrors.category = 'A categoria principal é obrigatória.';
     } else {
-      const catObj = CATEGORIES_CATALOG.find((c) => c.id === formData.category);
+      const catObj = categories.find((c) => c.id === formData.category);
       if (catObj && catObj.subcategories.length > 0 && !formData.subcategory) {
         newErrors.subcategory = `Selecione uma subcategoria de ${catObj.name}.`;
       }
@@ -283,10 +293,61 @@ export const ProductFormView: React.FC<ProductFormViewProps> = ({
     { id: 'pricing', label: '3. Preços & Descontos', icon: DollarSign },
     { id: 'media', label: '4. Imagens & Galeria', icon: ImageIcon },
     { id: 'stock', label: '5. Stock & Armazém', icon: Boxes },
-    { id: 'content', label: '6. Descrição & Ficha Técnica', icon: Sliders },
-    { id: 'variants', label: '7. Cores & Tamanhos', icon: Sparkles },
-    { id: 'preview', label: '8. Pré-visualização Loja', icon: Eye },
+    { id: 'description', label: '6. Descrição do Produto', icon: FileText },
+    { id: 'dimensions', label: '7. Dimensões & Logística', icon: Box },
+    { id: 'specs', label: '8. Ficha Técnica & Caixa', icon: Sliders },
+    { id: 'variants', label: '9. Cores & Tamanhos', icon: Sparkles },
+    { id: 'preview', label: '10. Pré-visualização Loja', icon: Eye },
   ];
+
+  const handleApplyDescriptionTemplate = (type: 'moda' | 'calcado' | 'relogio' | 'gadget' | 'clear') => {
+    if (type === 'clear') {
+      updateField('description', '');
+      return;
+    }
+    const templates: Record<string, string> = {
+      moda: `[Visão Geral do Produto]
+Peça confeccionada com tecidos nobres e acabamentos de alfaiataria para garantir frescura, mobilidade e elegância nos dias quentes e noites de Angola.
+
+[Destaques e Características]
+- Corte estruturado com caimento impecável
+- Fibras respiráveis com toque suave na pele
+- Costuras duplas reforçadas para máxima durabilidade
+
+[Ocasiões Recomendadas]
+Ideal para reuniões executivas, saídas sociais ao fim de semana ou cerimónias formais.`,
+      calcado: `[Design & Conforto Ergonómico]
+Calçado concebido para aliar estética contemporânea e absorção de impacto em pisos urbanos.
+
+[Materiais e Construção]
+- Cabedal resistente com acabamento premium
+- Palmilha acolchoada anatómica com amortecimento
+- Sola em borracha vulcanizada antiderrapante de alta tração
+
+[Cuidados de Conservação]
+Limpar com pano macio levemente humedecido e sabão neutro; secar à sombra.`,
+      relogio: `[Precisão & Distinção Zenza]
+Acessório de alta precisão com acabamento sofisticado para complementar qualquer composição com classe.
+
+[Especificações Notáveis]
+- Mostrador protegido com cristal temperado resistente a riscos
+- Fecho seguro em aço inoxidável
+- Pulseira confortável e ajustável
+
+[Acompanhamento]
+Entregue em estojo acolchoado Zenza Shop com cartão de autenticidade.`,
+      gadget: `[Tecnologia & Desempenho]
+Equipamento desenvolvido com tecnologia atual para otimizar o seu dia a dia com fiabilidade e autonomia.
+
+[Recursos Principais]
+- Bateria de longa duração com recarga rápida
+- Estrutura leve, portátil e resistente
+- Operação simples e compatibilidade imediata`,
+    };
+
+    updateField('description', templates[type] || '');
+    info('Esqueleto Carregado', 'Estrutura de descrição inserida. Pode agora personalizar com os dados deste produto.');
+  };
 
   return (
     <div className="space-y-6 pb-24">
@@ -699,40 +760,113 @@ export const ProductFormView: React.FC<ProductFormViewProps> = ({
             </div>
           </Card>
 
-          {/* SECTION 6: DESCRIÇÃO & CONTEÚDO */}
-          <Card id="content">
+          {/* SECTION 6: DESCRIÇÃO INDIVIDUAL DO PRODUTO */}
+          <Card id="description">
             <CardHeader>
-              <CardTitle>6. Descrição e Ficha Técnica</CardTitle>
-              <CardDescription>
-                Texto detalhado sobre o produto, especificações técnicas e itens incluídos na caixa.
-              </CardDescription>
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                <div>
+                  <CardTitle>6. Descrição Individual do Produto</CardTitle>
+                  <CardDescription>
+                    Cada produto tem a sua própria descrição detalhada sobre corte, materiais, estilo e ocasiões de uso.
+                  </CardDescription>
+                </div>
+                {/* Assistant template pills */}
+                <div className="flex flex-wrap items-center gap-1.5 bg-[#f8f9fa] p-1.5 rounded-xl border border-[rgba(25,28,29,0.08)]">
+                  <span className="text-[10px] font-bold text-[#a63500] flex items-center gap-1 px-1">
+                    <Wand2 className="w-3 h-3" />
+                    Modelos Rápidos:
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => handleApplyDescriptionTemplate('moda')}
+                    className="text-[10px] px-2 py-0.5 rounded-md bg-white border border-[rgba(25,28,29,0.10)] font-medium hover:text-[#a63500]"
+                  >
+                    Moda
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleApplyDescriptionTemplate('calcado')}
+                    className="text-[10px] px-2 py-0.5 rounded-md bg-white border border-[rgba(25,28,29,0.10)] font-medium hover:text-[#a63500]"
+                  >
+                    Calçado
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleApplyDescriptionTemplate('relogio')}
+                    className="text-[10px] px-2 py-0.5 rounded-md bg-white border border-[rgba(25,28,29,0.10)] font-medium hover:text-[#a63500]"
+                  >
+                    Acessórios
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleApplyDescriptionTemplate('gadget')}
+                    className="text-[10px] px-2 py-0.5 rounded-md bg-white border border-[rgba(25,28,29,0.10)] font-medium hover:text-[#a63500]"
+                  >
+                    Eletrónica
+                  </button>
+                  {formData.description && (
+                    <button
+                      type="button"
+                      onClick={() => handleApplyDescriptionTemplate('clear')}
+                      className="text-[10px] px-1.5 py-0.5 rounded-md text-red-600 hover:bg-red-50 font-semibold ml-1"
+                    >
+                      Limpar
+                    </button>
+                  )}
+                </div>
+              </div>
             </CardHeader>
 
-            <div className="space-y-6">
-              {/* Description */}
+            <div className="space-y-4">
               <FormField
                 id="product-description"
-                label="Descrição Detalhada do Produto"
+                label="Texto Descritivo do Produto"
                 error={errors.description}
-                hint={`${formData.description.length} caracteres • Suporta quebras de linha e destaques`}
+                hint={`${formData.description.length} caracteres • Escreva um texto específico e persuasivo para este produto`}
               >
                 <Textarea
                   id="product-description"
-                  rows={5}
-                  placeholder="Descreva a qualidade, o caimento, os materiais e as ocasiões de uso recomendadas..."
+                  rows={6}
+                  placeholder="Descreva detalhadamente a qualidade deste produto, caimento, tecidos ou materiais, sensações ao vestir ou usar e recomendações específicas..."
                   value={formData.description}
                   onChange={(e) => updateField('description', e.target.value)}
                   error={errors.description}
                 />
               </FormField>
+            </div>
+          </Card>
 
+          {/* SECTION 7: DIMENSÕES & LOGÍSTICA DE ENTREGA */}
+          <Card id="dimensions">
+            <CardHeader>
+              <CardTitle>7. Dimensões Físicas & Peso (Logística Zenza Express)</CardTitle>
+              <CardDescription>
+                Cada produto possui as suas próprias medidas e peso para cálculo de frete, etiquetas de despacho e manuseio no armazém.
+              </CardDescription>
+            </CardHeader>
+
+            <DimensionsEditor
+              dimensions={formData.dimensions}
+              onChange={(updatedDims) => updateField('dimensions', updatedDims)}
+              error={errors.dimensions}
+            />
+          </Card>
+
+          {/* SECTION 8: FICHA TÉCNICA & ITENS DA CAIXA */}
+          <Card id="specs">
+            <CardHeader>
+              <CardTitle>8. Especificações Técnicas e Conteúdo da Embalagem</CardTitle>
+              <CardDescription>
+                Tabela de especificações chave-valor e lista de itens que acompanham o artigo na caixa.
+              </CardDescription>
+            </CardHeader>
+
+            <div className="space-y-6">
               {/* Technical Specifications */}
-              <div className="pt-2">
-                <SpecsKeyValEditor
-                  specs={formData.specs}
-                  onChange={(updatedSpecs) => updateField('specs', updatedSpecs)}
-                />
-              </div>
+              <SpecsKeyValEditor
+                specs={formData.specs}
+                onChange={(updatedSpecs) => updateField('specs', updatedSpecs)}
+              />
 
               {/* Box Items */}
               <div className="pt-2">
@@ -744,10 +878,10 @@ export const ProductFormView: React.FC<ProductFormViewProps> = ({
             </div>
           </Card>
 
-          {/* SECTION 7: VARIANTES */}
+          {/* SECTION 9: VARIANTES */}
           <Card id="variants">
             <CardHeader>
-              <CardTitle>7. Variantes de Cor e Tamanho</CardTitle>
+              <CardTitle>9. Variantes de Cor e Tamanho</CardTitle>
               <CardDescription>
                 Amostras visuais de cores (*swatches*) e tabela de medidas para seleção do cliente.
               </CardDescription>
@@ -765,12 +899,12 @@ export const ProductFormView: React.FC<ProductFormViewProps> = ({
             />
           </Card>
 
-          {/* SECTION 8: PRÉ-VISUALIZAÇÃO PÚBLICA EM TEMPO REAL */}
+          {/* SECTION 10: PRÉ-VISUALIZAÇÃO PÚBLICA EM TEMPO REAL */}
           <Card id="preview">
             <CardHeader>
-              <CardTitle>8. Pré-visualização na Loja Zenza Shop</CardTitle>
+              <CardTitle>10. Pré-visualização na Loja Zenza Shop</CardTitle>
               <CardDescription>
-                Veja exatamente como este produto será renderizado para os clientes da loja.
+                Veja exatamente como este produto, com a sua descrição própria e dimensões, será renderizado para os clientes da loja.
               </CardDescription>
             </CardHeader>
 

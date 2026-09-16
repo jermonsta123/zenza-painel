@@ -19,6 +19,14 @@ export interface ProductColor {
   hex: string;
 }
 
+export interface ProductDimensions {
+  weightKg?: number;       // Peso do produto em kg (ex: 0.45 kg ou 1.2 kg)
+  lengthCm?: number;       // Comprimento em cm (ex: 30 cm)
+  widthCm?: number;        // Largura em cm (ex: 20 cm)
+  heightCm?: number;       // Altura em cm (ex: 8 cm)
+  packageType?: string;    // Embalagem (ex: "Caixa Standard Zenza", "Saco Acolchoado", "Estojo Rígido")
+}
+
 export type ProductStatus = 'draft' | 'published' | 'archived';
 export type SizeCategory = 'clothing' | 'footwear' | 'accessories' | 'none';
 
@@ -52,9 +60,10 @@ export interface Product {
   trackInventory: boolean;      // Whether stock is strictly tracked
   
   // Content & Details
-  description: string;          // Rich text / markdown description
+  description: string;          // Rich text / markdown description própria do produto
   specs: ProductSpec[];         // Key-Value technical specifications
   boxItems: string[];           // What is included in the package / box
+  dimensions?: ProductDimensions; // Dimensões físicas e peso próprios do produto
   
   // Variants
   colors: ProductColor[];       // Color choices with name + hex
@@ -83,9 +92,11 @@ export interface ProductFormErrors {
   stockCount?: string;
   sku?: string;
   description?: string;
+  dimensions?: string;
   specs?: string;
   boxItems?: string;
   colors?: string;
   sizes?: string;
   general?: string;
 }
+

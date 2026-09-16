@@ -382,6 +382,42 @@ export const PublicProductPreview: React.FC<PublicProductPreviewProps> = ({
                 </div>
               )}
 
+              {/* Dimensions & Delivery Logistics */}
+              {product.dimensions && (
+                <div className="space-y-2">
+                  <h3 className="text-sm font-bold text-[#191c1d] uppercase tracking-wider flex items-center gap-1.5">
+                    <Ruler className="w-4 h-4 text-[#a63500]" />
+                    Dimensões Físicas & Logística
+                  </h3>
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 p-3.5 bg-[#f8f9fa] rounded-xl border border-[rgba(25,28,29,0.08)] text-xs">
+                    <div>
+                      <span className="text-[11px] text-[#191c1d]/50 block">Peso do Artigo</span>
+                      <strong className="text-[#191c1d] text-sm">
+                        {product.dimensions.weightKg ? `${product.dimensions.weightKg} kg (${Math.round(product.dimensions.weightKg * 1000)}g)` : 'Sob consulta'}
+                      </strong>
+                    </div>
+                    <div>
+                      <span className="text-[11px] text-[#191c1d]/50 block">Dimensões (C × L × A)</span>
+                      <strong className="text-[#191c1d] text-sm font-mono">
+                        {product.dimensions.lengthCm || 0} × {product.dimensions.widthCm || 0} × {product.dimensions.heightCm || 0} cm
+                      </strong>
+                    </div>
+                    <div>
+                      <span className="text-[11px] text-[#191c1d]/50 block">Volume Estimado</span>
+                      <strong className="text-[#191c1d] text-sm">
+                        {((((product.dimensions.lengthCm || 0) * (product.dimensions.widthCm || 0) * (product.dimensions.heightCm || 0))) / 1000).toFixed(2)} L
+                      </strong>
+                    </div>
+                    <div>
+                      <span className="text-[11px] text-[#191c1d]/50 block">Embalagem</span>
+                      <strong className="text-[#191c1d] text-xs truncate block">
+                        {product.dimensions.packageType || 'Caixa Standard Zenza'}
+                      </strong>
+                    </div>
+                  </div>
+                </div>
+              )}
+
               {/* Technical Specifications */}
               {product.specs && product.specs.length > 0 && (
                 <div className="space-y-2">
